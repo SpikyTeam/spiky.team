@@ -32,8 +32,14 @@ jobs:
           ref: gh-pages
           path: out
 
+      # inline on purpose: a script file would have to live on gh-pages, and
+      # that branch is wiped on every publish
       - name: Copy the page in
-        run: bash .github/workflows/copy.sh
+        run: |
+          git -C out rm -rq --cached . || true
+          find out -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a src/spiky/. out/
+          touch out/.nojekyll
 
       - name: Commit
         working-directory: out
