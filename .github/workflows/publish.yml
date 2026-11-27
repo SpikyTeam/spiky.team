@@ -41,6 +41,12 @@ jobs:
           cp -a src/spiky/. out/
           touch out/.nojekyll
 
+      # CNAME says which domain this branch serves;
+      # without it Pages drops the custom domain on the next publish.
+      - name: CNAME
+        working-directory: out
+        run: printf '%s\n' "spiky.team" > CNAME
+
       - name: Commit
         working-directory: out
         run: |
