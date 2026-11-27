@@ -1,0 +1,46 @@
+﻿name: publish site
+
+# Pushes the page source from SpikyMC-Sites onto the gh-pages branch, which is
+# what GitHub Pages serves for this repository.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: SpikyTeam/SpikyMC-Sites
+          token: ${{ secrets.PUBLISH_TOKEN }}
+          path: src
+          sparse-checkout: spiky
+
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: out
+
+      - name: Copy the page in
+        run: bash .github/workflows/copy.sh
+
+      - name: Commit
+        working-directory: out
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "nothing changed" && exit 0
+          git commit -m "publish from SpikyMC-Sites"
+          git push
